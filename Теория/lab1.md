@@ -28,4 +28,249 @@
 ---
 7. Шифр Виженера. Тест Казисского
 
+1) Bản rõ và khóa
+
+- Bản rõ (có dấu cách):
+  `WE ARE MEETING AT THE MARKET AT THREE IN THE AFTERNOON BRING THE MAP AND THE KEY`
+
+- Khóa: `LEMON`
+
+> Trong Vigenère, khi mã hóa thường ta **bỏ dấu cách / dấu câu** và đưa về chữ hoa.
+
+2) Chuẩn hóa bản rõ
+
+```
+WEAREMEETINGATTHEMARKETATTHREEINTHEAFTERNOONBRINGTHEMAPANDTHEKEY
+```
+
+3) Mã hóa Vigenère (encryption)
+
+Ta lặp khóa `LEMON` cho đủ dài:
+
+```
+Plain: WEAREMEETINGATTHEMARKETATTHREEINTHEAFTERNOONBRINGTHEMAPANDTHEKEY
+Key:   LEMONLEMONLEMONLEMONLEMONLEMONLEMONLEMONLEMONLEMONLEMONLEMONLEMO
+```
+
+- Mã hóa vài ký tự đầu (để thấy cách làm)
+
+Quy ước: `A=0, B=1, ..., Z=25`
+
+* `W + L = H`
+* `E + E = I`
+* `A + M = M`
+* `R + O = F`
+* `E + N = R`
+
+=> 5 ký tự đầu: `WEARE` → `HIMFR`
+
+- Kết quả mã hóa toàn bộ
+
+```
+HIMFRXIQHVYKMHGSIYOEVIFOGELDSRTRFVRLJFSEYSABOCMZUGSIYOCLRPHUPOQM
+```
+
+✅ Đây là **bản mã (ciphertext)**.
+
+4) Giải mã lại (decryption)
+
+Công thức giải mã là trừ khóa:
+
+`P = (C - K) mod 26`
+
+- Giải vài ký tự đầu
+
+* `H - L = W`
+* `I - E = E`
+* `M - M = A`
+* `F - O = R`
+* `R - N = E`
+
+=> `HIMFR` → `WEARE`
+
+✅ Giải hết sẽ ra lại đúng bản rõ:
+
+```
+WEAREMEETINGATTHEMARKETATTHREEINTHEAFTERNOONBRINGTHEMAPANDTHEKEY
+```
+
+5) Kasiski test trên chính bản mã này
+
+Bản mã:
+
+```
+HIMFRXIQHVYKMHGSIYOEVIFOGELDSRTRFVRLJFSEYSABOCMZUGSIYOCLRPHUPOQM
+```
+
+- Bước 1: Tìm cụm lặp (3+ ký tự)
+
+Ta thấy cụm:
+
+* `GSIYO` xuất hiện **2 lần**
+* (hoặc các cụm con `GSI`, `SIY`, `IYO` cũng lặp)
+
+Ví dụ:
+
+* `GSIYO` ở vị trí **15**
+* `GSIYO` ở vị trí **50**
+
+- Bước 2: Tính khoảng cách
+
+* `50 - 15 = 35`
+
+- Bước 3: Phân tích ước số
+
+* `35 = 5 × 7`
+
+👉 Độ dài khóa khả dĩ là:
+
+* **5** (đúng trong ví dụ này)
+* hoặc **7** (ứng viên nhiễu, cần kiểm tra thêm)
+
+✅ Khóa thật là `LEMON` → dài **5**
+
+6) Vì sao đây là ví dụ “bình thường” và vẫn dùng được Kasiski?
+
+Trong bản rõ trên, từ **`THE`** xuất hiện nhiều lần (rất tự nhiên trong tiếng Anh).
+
+Nhưng điều quan trọng là:
+
+* Cùng từ `THE`, **không phải lúc nào cũng ra cùng bản mã**
+* Chỉ khi nó rơi vào **cùng pha khóa** (same key phase), nó mới mã hóa thành cùng chuỗi
+
+Ví dụ trong bản này:
+
+* một lần `THE` → `GSI`
+* lần khác `THE` → `FVR`
+* lần khác nữa `THE` → `HUP`
+
+Chỉ có các lần `THE` ở **cùng pha khóa** mới cho cùng kết quả (`GSI`) → từ đó Kasiski mới bắt được cụm lặp.
+
+👉 Đây chính là điểm “thực tế” của Kasiski:
+
+* không phải cứ từ lặp là bản mã sẽ lặp
+* phải **trùng từ + trùng pha khóa**
+
+từ ví dụ trước:
+đã có Kasiski → đoán độ dài khóa = 5, giờ ta chia 5 cột và tìm khóa LEMON từng chữ.
+
+Dữ liệu đang có
+
+Bản mã (ciphertext)
+
+```
+HIMFRXIQHVYKMHGSIYOEVIFOGELDSRTRFVRLJFSEYSABOCMZUGSIYOCLRPHUPOQM
+```
+
+Từ Kasiski test
+
+Ta đã suy ra độ dài khóa khả dĩ = 5.
+
+Bước 1) Chia bản mã thành 5 cột
+
+Cách làm: viết bản mã thành hàng, mỗi hàng 5 ký tự (vì khóa dài 5):
+
+```
+H I M F R
+X I Q H V
+Y K M H G
+S I Y O E
+V I F O G
+E L D S R
+T R F V R
+L J F S E
+Y S A B O
+C M Z U G
+S I Y O C
+L R P H U
+P O Q M
+```
+
+> Hàng cuối thiếu 1 ký tự là bình thường.
+
+Lấy theo cột (đọc dọc xuống)
+
+Cột 1 (vị trí 1, 6, 11, ...)
+
+```
+HXYSVETLYCSLP
+```
+Cột 2 (vị trí 2, 7, 12, ...)
+
+```
+IIKIILRJSMIRO
+```
+Cột 3 (vị trí 3, 8, 13, ...)
+
+```
+MQMYFDFFAZYPQ
+```
+Cột 4 (vị trí 4, 9, 14, ...)
+
+```
+FHHOOSVSBUOHM
+```
+Cột 5 (vị trí 5, 10, 15, ...)
+
+```
+RVGEGRREOGCU
+```
+
+Bước 2 Vì sao mỗi cột là Caesar?
+
+Vì khóa dài 5, nên:
+
+* mọi ký tự ở **cột 1** đều dùng **cùng chữ khóa thứ 1**
+* cột 2 dùng chữ khóa thứ 2
+* ...
+* cột 5 dùng chữ khóa thứ 5
+
+=> mỗi cột là một Caesar cipher riêng.
+
+Bước 3 Tìm từng chữ khóa bằng frequency analysis (thống kê)
+
+Ở bước này, trong lab thường làm như sau:
+
+* Với **mỗi cột**, thử dịch Caesar từ **0..25**
+* Tính điểm “giống tiếng Anh” (thường dùng **chi-square** theo tần suất chữ cái)
+* Chọn shift có điểm tốt nhất
+
+> Lưu ý: chuỗi trong từng cột **không thành từ hoàn chỉnh**, nên không nhìn bằng mắt để đọc từ. Ta dựa vào **thống kê**.
+
+Kết quả cho từng cột
+
+Cột 1: `HXYSVETLYCSLP`
+
+* Shift tốt nhất: **11**
+* 11 tương ứng chữ: **L**
+
+✅ Chữ khóa thứ 1 = **L**
+
+Cột 2: `IIKIILRJSMIRO`
+
+* Shift tốt nhất: **4**
+* 4 tương ứng chữ: **E**
+
+✅ Chữ khóa thứ 2 = **E**
+... cột 3,4,5 tương tự nên ta thu được key là LEMON
+
+---
+8. Принцип Кергоффса
+- Криптосистема должна сохранять криптостойкость даже в случае, если атакующий знает все детали о самой криптосистеме за исключением криптографического ключа.
+---
+9. Роторные машины. Краткое описание принципа работы и внутренней структуры. Пространство ключей роторной машины.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
