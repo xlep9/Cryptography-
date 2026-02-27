@@ -14,6 +14,9 @@
 - математическая криптография: RSA, AES
 ---
 4. Шифры замены, перестановки и сдвига
+- Шифры замены: thay bảng chữ cái bằng một bảng chữ cái mới sau đó thay thế text ban đầu bằng bảng chữ cái đó
+- перестановки: có một key ví dụ BINH, khóa này có 4 chữ cái, ta chia text thành 4 cột, sau đó đọc theo thứ tự bảng chữ cái của key
+- сдвига: ví dụ key=5 ta dịch tất cả text 5 kí tự
 ---
 5. Атака полного перебора ключа и частотный анализ символов
 - Brute force (полный перебор): Thử tất cả khóa có thể
